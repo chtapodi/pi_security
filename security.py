@@ -20,19 +20,30 @@ def get_file_paths(path) :
 	return file_list
 
 
+#takes in an input of img paths and returns a list of encoded img values
+def load_encoding(path_list) :
+	encoding_list=[]
+	for path in path_list :
+		img=face_recognition.load_image_file(path)
+		encoding_list.append(face_recognition.face_encodings(img)[0])
+	return encoding_list
+
 #This should update the face database with all stored face values.
 #returns two lists of equal length, encoded images and their associated names
 def load_faces(path) :
-	name_list=[]
-	encoding_list=[]
 	path_list=get_file_paths(path)
+	name_list=path_to_name(path_list)
+	encoding_list=load_encoding(path_list)
 
+	return encoding_list, name_list
 
+#takes in a list of paths and outputs a list of just the names of the files
+def path_to_name(path_list) :
+	name_list=[]
 	for file in path_list :
 		name=os.path.splitext(os.path.basename(file))[0]
 		name_list.append(name)
-	fprint("name_list",name_list)
-
+	return name_list
 
 
 ####INIT####
