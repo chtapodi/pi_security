@@ -19,11 +19,19 @@ def get_file_paths(path) :
 			file_list.append(os.path.join(path, filename))
 	return file_list
 
+
 #This should update the face database with all stored face values.
 #returns two lists of equal length, encoded images and their associated names
 def load_faces(path) :
+	name_list=[]
+	encoding_list=[]
 	path_list=get_file_paths(path)
-	fprint("path_list",path_list)
+
+
+	for file in path_list :
+		name=os.path.splitext(os.path.basename(file))[0]
+		name_list.append(name)
+	fprint("name_list",name_list)
 
 
 
