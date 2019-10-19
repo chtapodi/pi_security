@@ -8,7 +8,10 @@ import os
 import scipy.misc
 import telegram_send as ts
 import imageio
+import shutil
 
+from datetime import datetime
+now = datetime.now() # current date and time
 
 #This just makes it so much easier
 def fprint(text, value) :
@@ -16,7 +19,8 @@ def fprint(text, value) :
 
 
 def approved_handler(identity_list) :
-	telegram_send_image("APPROVED")
+	print("this is {0}".format(identity_list))
+	telegram_send_image("Welcome {}".format(', '.join(identity_list)).title())
 
 #captures new IMG, returns it
 def capture(camera) :
@@ -30,19 +34,22 @@ def capture(camera) :
 def classify_and_handle(captured_enconding, approved_collection, rejected_collection) :
 	approved_list=[]
 	rejected_list=[]
-	rejected_list=face_compare(captured_enconding, rejected_collection)
+	rejected_list=face_compare(captured_enconding, rejected_collection) #see who is approved
 
 	if (len(captured_enconding)>0) : #bc all the faces may be rejected
-		approved_list=face_compare(captured_enconding, approved_collection)
+		approved_list=face_compare(captured_enconding, approved_collection) #see who is approved
 
 	if (len(approved_list)>0) :
 		approved_handler(approved_list)
 
 	if (len(rejected_list)>0) :
-		rejected_handler(approved_list)
+		rejected_handler(rejected_list)
 
 	if (len(captured_enconding)>0) : #if the removal of elements in the captured_enconding list has worked, this will be 0 only if there are unknown indeviduals
 		unknown_handler()
+
+def count_files_in_dir(dir) :
+	return len([name for name in os.listdir(dir) if os.path.isfile(os.path.join(dir, name))])
 
 #captures and extracts faces and their locations, returning them
 def extract_faces(camera):
@@ -78,6 +85,8 @@ def get_file_paths(path) :
 			file_list.append(os.path.join(path, filename))
 	return file_list
 
+def move_to_unknown() :
+	shutil.move("tmp.jpg", "unknown/{0}.jpg".format(now.strftime("%m_%d_%Y%_H_%M_%S")))
 
 #takes in an input of img paths and returns a list of encoded img values
 def load_encoding(path_list) :
@@ -113,6 +122,7 @@ def telegram_send_image(message) :
 
 def unknown_handler() :
 	telegram_send_image("Unknown")
+	move_to_unknown()
 
 
 def main():
@@ -153,7 +163,17 @@ def main():
 	print("Begin")
 	while True:
 		encoded_faces=extract_faces(camera)
+
 		classify_and_handle(encoded_faces, approved_collection,rejected_collection)
+
+		if(count_files_in_dir(approved_path)>start_approved_length) :
+			approved_collection=load_faces(approved_path)
+			start_approved_length=len(approved_collection[0])
+
+		if(count_files_in_dir(rejected_path)>start_rejected_length) :
+			rejected_collection=load_faces(rejected_path)
+			start_rejected_length=len(rejected_collection[0])
+
 
 
 main()
