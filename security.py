@@ -22,7 +22,7 @@ def fprint(text, value) :
 def approved_handler(identity_list) :
 	name_list=set(identity_list)
 	print("this is {0}".format(name_list))
-	telegram_send_image("Welcome {}".format(', '.join(name_list)).title())
+	telegram_send_message("Welcome {}".format(', '.join(name_list)).title())
 
 	improve_recognition(identity_list)
 
@@ -144,6 +144,9 @@ def rejected_handler(identity_list) :
 def telegram_send_image(message) :
 	with open("tmp.jpg", "rb") as f:
 		ts.send(images=[f], messages=["{}".format(message)])
+
+def telegram_send_message(message) :
+	ts.send(messages=["{}".format(message)])
 
 def unknown_handler() :
 	telegram_send_image("Unknown")
