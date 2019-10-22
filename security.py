@@ -12,14 +12,26 @@ import shutil
 import time
 
 import facial_recognition_handler
-
+import telegram_security
+#test ID =-354289193
 def main():
+	TOKEN="913604198:AAGjGty2I0vkPV-gkA2jkpIUrDJcTeAxXnc"
+	ID="-354289193"
+	ts=telegram_security.telegram_security(TOKEN, ID)
+	print("started telegram bot")
 	fr=facial_recognition_handler.recognition_handler()
 
 
 	print("Begin")
 	while True:
-		dict=fr.classify_and_handle()
-		print(dict)
+		detected_dict=fr.classify_and_handle()
+
+		if(detected_dict["unkown"]>0) :
+			ts.unkown_handler()
+		print(detected_dict)
+		if(len(detected_dict["approved"])>0) :
+			for name in detected_dict["approved"] :
+				ts.send_message("Hello {}".format(name))
+
 
 main()
