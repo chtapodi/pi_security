@@ -23,14 +23,14 @@ class recognition_handler() :
 		#load in all data, will take a hot sec
 		print("Loading in database")
 		self.approved_collection=self.load_faces(approved_path)
-		self.regis_collection=self.load_faces(regis_path)
+		self.registered_collection=self.load_faces(registered_path)
 		self.rejected_collection=self.load_faces(rejected_path)
 		# unknown_collection=load_faces(unknown_path)
 		print("Loaded")
 
 		#reference lengths so it can be determined when a reload is needed
 		self.start_approved_length=len(self.approved_collection[0])
-		self.start_registeredd_length=len(self.registeredd_collection[0])
+		self.start_registered_length=len(self.registered_collection[0])
 		self.start_rejected_length=len(self.rejected_collection[0])
 
 
@@ -45,23 +45,25 @@ class recognition_handler() :
 	def classify_and_handle(self) :
 		captured_enconding=self.extract_faces(self.camera)
 		approved_list=[]
-		registeredd_list=[]
+		registered_list=[]
 		rejected_list=[]
+		num_sorted=0
 		rejected_list=self.face_compare(captured_enconding, self.rejected_collection) #see who is approved
-
-		if (len(captured_enconding)>(len(rejected_list))) : #bc all the faces may be rejected
+		num_sorted+=len(rejected_list)
+		if (len(captured_enconding)>num_sorted) : #bc all the faces may be rejected
 			approved_list=self.face_compare(captured_enconding, self.approved_collection) #see who is approved
+			num_sorted+=len(approved_list)
 
-		if (len(captured_enconding)>(len(rejected_list)+len(approved_list))) : #bc all the faces may be approved
-			registeredd_list=self.face_compare(captured_enconding, self.registeredd_collection) #see who is registeredd
+		if (len(captured_enconding)>num_sorted) : #bc all the faces may be approved
+			registered_list=self.face_compare(captured_enconding, self.registered_collection) #see who is registered
+			num_sorted+=len(registered_list)
 
-
-		num_unknown=len(captured_enconding)-(len(rejected_list)+len(approved_list)+len(registered_list))
+		num_unknown=len(captured_enconding)-num_sorted
 
 
 		detected={
 			"approved" : approved_list,
-			"registered" : registered,
+			"registered" : registered_list,
 			"rejected" : rejected_list,
 			"unkown" : num_unknown
 		}
@@ -115,7 +117,7 @@ class recognition_handler() :
 				file_list.append(os.path.join(path, filename))
 		return file_list
 
-
+#TODO need to add ability to switch between registered and approved
 	def improve_recognition(self,identity_list) : #path to move to
 		if (len(set(identity_list))<=1) : #if theres only one face
 			approved_time=time.time()

@@ -1,4 +1,4 @@
-#This code will run a camera security system that sends alerts about recognized people via telegram.
+ #This code will run a camera security system that sends alerts about recognized people via telegram.
 #The goal is to eventually incorperate the ability to dynamically take snapshots of Unknown indeviduals and add them to the directory
 
 import face_recognition
@@ -31,7 +31,11 @@ def main():
 		print(detected_dict)
 		if(len(detected_dict["approved"])>0) :
 			for name in detected_dict["approved"] :
-				ts.send_message("Hello {}".format(name))
+				ts.send_message("Welcome home {}".format(name.title()))
+
+		if(len(detected_dict["registered"])>0) :
+			for name in detected_dict["registered"] :
+				ts.send_message("Detected {}".format(name.title()))
 
 
 main()

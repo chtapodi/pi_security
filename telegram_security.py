@@ -23,6 +23,7 @@ class telegram_security() :
 
 		#register listeners
 		dp.add_handler(CommandHandler("approve", self.approve))
+		dp.add_handler(CommandHandler("register", self.register))
 		dp.add_handler(CommandHandler("help", self.help))
 
 		# log all errors
@@ -49,6 +50,17 @@ class telegram_security() :
 		shutil.move(last_path, '{0}/{1}.jpg'.format(self.approved_path,name))
 
 		update.message.reply_text('Confirmed the addition of {}'.format(name))
+
+	#when you want to approve a new member
+	#syntax is /approve <name>
+	def register(self,update, context):
+		received_text=update.message.text
+		name=received_text.split(" ")[1] #ignores anything after the first word
+
+		last_path=self.get_last_unkown()
+		shutil.move(last_path, '{0}/{1}.jpg'.format(self.registered_path,name))
+
+		update.message.reply_text('Confirmed the registration of {}'.format(name))
 
 	def error(self,update, context):
 		"""Log Errors caused by Updates."""
