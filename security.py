@@ -11,6 +11,10 @@ import imageio
 import shutil
 import time
 
+logging_fmt = '[%(asctime)s] %(filename)s [%(levelname)s] %(message)s'
+logging.basicConfig(filename='security.log', filemode='w', format=logging_fmt, level=logging.INFO)
+
+
 import facial_recognition_handler
 import telegram_security
 #test ID =-354289193
@@ -24,18 +28,22 @@ def main():
 
 	print("Begin")
 	while True:
-		detected_dict=fr.classify_and_handle()
+		try:
+			detected_dict=fr.classify_and_handle()
 
-		if(detected_dict["unkown"]>0) :
-			ts.unkown_handler()
-		print(detected_dict)
-		if(len(detected_dict["approved"])>0) :
-			for name in detected_dict["approved"] :
-				ts.send_message("Welcome home {}".format(name.title()))
+			if(detected_dict["unkown"]>0) :
+				ts.unkown_handler()
+			# print(detected_dict)
+			if(len(detected_dict["approved"])>0) :
+				for name in detected_dict["approved"] :
+					ts.send_message("Welcome home {}".format(name.title()))
 
-		if(len(detected_dict["registered"])>0) :
-			for name in detected_dict["registered"] :
-				ts.send_message("Detected {}".format(name.title()))
+			if(len(detected_dict["registered"])>0) :
+				for name in detected_dict["registered"] :
+					ts.send_message("Detected {}".format(name.title()))
+		except Exception:
+			logger.warn("Something somewhere is wrong", exc_info=True)
+
 
 
 main()

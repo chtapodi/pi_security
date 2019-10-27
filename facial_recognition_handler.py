@@ -7,9 +7,13 @@ import telegram_send as ts
 import imageio
 import shutil
 import time
+import logging
 
 class recognition_handler() :
 	def __init__(self, approved_path="./approved_faces", registered_path="./registered_faces", rejected_path="./rejected_faces",unknown_path="./unknown_faces"):
+
+		logging_fmt = '[%(asctime)s] %(filename)s [%(levelname)s] %(message)s'
+		logging.basicConfig(filename='fr.log', filemode='w', format=logging_fmt, level=logging.INFO)
 
 		self.camera = picamera.PiCamera()
 		self.camera.resolution = (320, 240)
@@ -82,9 +86,11 @@ class recognition_handler() :
 	#captures and extracts faces and their locations, returning them
 	def extract_faces(self,camera):
 		image=self.capture(camera)
+		logging.info("captured image")
 		location_list = face_recognition.face_locations(image)
 		num_faces=len(location_list)
 		if (num_faces>=1) : #if there are any faces
+			logging.info("detected a face")
 			print("save image")
 			imageio.imwrite('tmp.jpg', image) #saves a local file which can be messed with
 			encoding_list = face_recognition.face_encodings(image, location_list)
@@ -126,13 +132,14 @@ class recognition_handler() :
 			diff_list=[int(approved_time-time) for time in time_list]
 			for i in range(len(diff_list)) :
 				if (diff_list[i]<5) :#if theres images closer than 5 seconds
-					print("Attempting to improve recognition rates")
+					logging.info("Attempting to improve recognition rates")
 					to_move=unknown_list[i]
 					print("to_move {}".format(to_move))
 					shutil.move("{0}/{1}".format(self.unknown_path,to_move), '{0}/{1}.{2}.jpg'.format(path,identity_list[0],time_list[i]))
 
 
 	def move_to_unknown(self) :
+		logging.info("new unknown")
 		shutil.move("tmp.jpg", "{0}/{1}.jpg".format(self.unknown_path,int(time.time())))
 
 	#takes in an input of img paths and returns a list of encoded img values
@@ -141,8 +148,10 @@ class recognition_handler() :
 		for path in path_list :
 			img=face_recognition.load_image_file(path)
 			encoding=face_recognition.face_encodings(img)
-
-			encoding_list.append(encoding[0])
+			try :
+				encoding_list.append(encoding[0])
+			except :
+				logging.info("{} does not have recognized faces".format(path))
 		return encoding_list
 
 	#This should update the face database with all stored face values.
@@ -151,6 +160,7 @@ class recognition_handler() :
 		path_list=self.get_file_paths(path)
 		name_list=self.path_to_name(path_list)
 		encoding_list=self.load_encoding(path_list)
+		logging.info("loaded faces")
 		return [encoding_list, name_list]
 
 
