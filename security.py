@@ -10,6 +10,8 @@ import telegram_send as ts
 import imageio
 import shutil
 import time
+import logging
+
 
 logging_fmt = '[%(asctime)s] %(filename)s [%(levelname)s] %(message)s'
 logging.basicConfig(filename='security.log', filemode='w', format=logging_fmt, level=logging.INFO)
